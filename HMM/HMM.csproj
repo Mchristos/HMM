@@ -45,24 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Datastructures\ProbabilityVector.cs" />
-    <Compile Include="Datastructures\SearchGrid.cs" />
     <Compile Include="Functions\Extensions.cs" />
-    <Compile Include="MapMatching\Config\Constants.cs" />
-    <Compile Include="MapMatching\Config\DefaultValues.cs" />
-    <Compile Include="MapMatching\Datastructures\DijstraSearchItem.cs" />
-    <Compile Include="MapMatching\Datastructures\RoadGraph.cs" />
-    <Compile Include="MapMatching\Datastructures\RoadSearchGrid.cs" />
-    <Compile Include="MapMatching\Functions\CoordinateFunctions.cs" />
-    <Compile Include="MapMatching\Functions\DistanceFunctinos.cs" />
-    <Compile Include="MapMatching\Functions\Extensions.cs" />
-    <Compile Include="MapMatching\Functions\PathFinding.cs" />
-    <Compile Include="MapMatching\Functions\ProbabilityFunctions.cs" />
-    <Compile Include="MapMatching\MapMatchingHMM.cs" />
-    <Compile Include="MapMatching\MapMatcherParameters.cs" />
-    <Compile Include="MapMatching\Models\BoundingBox.cs" />
-    <Compile Include="MapMatching\Models\DirectedRoad.cs" />
-    <Compile Include="MapMatching\ValueObjects\Coord.cs" />
-    <Compile Include="MapMatching\ValueObjects\Distance.cs" />
     <Compile Include="ViterbiEngine.cs" />
     <Compile Include="ViterbiState.cs" />
     <Compile Include="IHiddenMarkovModel.cs" />

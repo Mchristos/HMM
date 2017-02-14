@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace HMM.Datastructures
 {
-    public class ProbabilityVector<T> : Dictionary<T, double>
+    public class ProbabilityVector<S> : Dictionary<S, double>
     {
         public ProbabilityVector() : base()
         {
         }
 
-        public ProbabilityVector(IEnumerable<T> collection) : base()
+        public ProbabilityVector(IEnumerable<S> collection) : base()
         {
             if (collection == null) { throw new NullReferenceException("Collection is null"); }
             int count = collection.Count();
@@ -23,12 +23,12 @@ namespace HMM.Datastructures
             }
         }
 
-        public ProbabilityVector<T> Normalize()
+        public ProbabilityVector<S> Normalize()
         {
             double sum = GetSum();
             if (sum > 0)
             {
-                var result = new ProbabilityVector<T>();
+                var result = new ProbabilityVector<S>();
                 foreach (var key in this.Keys)
                 {
                     result[key] = this[key] / sum;
@@ -46,7 +46,7 @@ namespace HMM.Datastructures
             return this.Values.Sum();
         }
 
-        public T GetMostProbableItem()
+        public S GetMostProbableItem()
         {
             if (this.Count == 0) { throw new Exception("Probability vector is empty"); }
             return this.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
