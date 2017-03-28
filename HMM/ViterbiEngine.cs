@@ -26,7 +26,7 @@ namespace HMM
         public bool TryUpdate(T observation)
         {
             //Get "nearby" states
-            List<S> nearbyStates = Model.GetHiddenStateCandidates(observation);
+            List<S> nearbyStates = Model.GetPossibleHiddenStates(observation);
 
             if(nearbyStates.Count == 0)
             {
@@ -41,7 +41,7 @@ namespace HMM
             {
                 foreach (var state in nearbyStates)
                 {
-                    newProbabilityVector[state] = Model.GetEmission(StateObservationPair<S, T>.New(state, observation));
+                    newProbabilityVector[state] = Model.GetEmissionProbability(StateObservationPair<S, T>.New(state, observation));
                     transitionMemory[state] = default(S);
                 }
             }
@@ -51,14 +51,14 @@ namespace HMM
                 {
                     var stateObservationPair = StateObservationPair<S, T>.New(state, observation);
                     // Calculate emission probability
-                    double emission = Model.GetEmission(stateObservationPair);
+                    double emission = Model.GetEmissionProbability(stateObservationPair);
 
                     var prevStateCandidates = new Dictionary<S, double>();
                     //Calculate most likely transition probability 
                     foreach (var prevCandidate in ViterbiState.Probabilities.Keys)
                     {
                         var candidateStateObservationPair = StateObservationPair<S, T>.New(prevCandidate, ViterbiState.PrevObservation);
-                        double transition = Model.GetTransition(candidateStateObservationPair, stateObservationPair);
+                        double transition = Model.GetTransitionProbability(candidateStateObservationPair, stateObservationPair);
                         prevStateCandidates[prevCandidate] = ViterbiState.Probabilities[prevCandidate] * transition;
                     }
                     var maxCandidate = prevStateCandidates.Aggregate((x, y) => x.Value > y.Value ? x : y);
