@@ -21,6 +21,7 @@ namespace HMM
         public ViterbiEngine(IHiddenMarkovModel<S, T> model)
         {
             ViterbiState = ViterbiState<S, T>.InitialState();
+            Model = model;
         }
 
         public bool TryUpdate(T observation)

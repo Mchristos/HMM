@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Datastructures\ProbabilityVector.cs" />
+    <Compile Include="ExampleModels\SimpleHMM.cs" />
     <Compile Include="Functions\Extensions.cs" />
     <Compile Include="ViterbiEngine.cs" />
     <Compile Include="ViterbiState.cs" />
