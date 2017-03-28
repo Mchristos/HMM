@@ -25,7 +25,7 @@ namespace HMM.Datastructures
 
         public ProbabilityVector<S> Normalize()
         {
-            double sum = GetSum();
+            double sum = Sum();
             if (sum > 0)
             {
                 var result = new ProbabilityVector<S>();
@@ -41,7 +41,11 @@ namespace HMM.Datastructures
             }
         }
 
-        public double GetSum()
+        /// <summary>
+        /// Sums the probabilities
+        /// </summary>
+        /// <returns></returns>
+        public double Sum()
         {
             return this.Values.Sum();
         }

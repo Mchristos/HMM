@@ -6,32 +6,32 @@ using System.Linq;
 namespace HMM
 {
     /// <summary>
-    /// Uses the viterbi algorithm to track the state of a Hidden Markov Model 
+    /// Uses the viterbi algorithm to track the most likely state of a Hidden Markov Model, given observations.
+    /// To use this class, define your own Hidden Markov Model by implementing IHiddenMarkovModel, and use the TryUpdate function to update the state of the engine. 
+    /// Then you can get the most likely sequence of states using GetMostLikelySequence(). 
     /// </summary>
-    /// <typeparam name="S"></typeparam>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="S"> State type </typeparam>
+    /// <typeparam name="T"> Observation type </typeparam>
     public class ViterbiEngine<S, T>
     {
         public ViterbiState<S, T> ViterbiState { get; set; }
 
-        private Func<StateObservationPair<S, T>, StateObservationPair<S, T>, double> TransitionFunction { get; set; }
-
-        private Func<StateObservationPair<S, T>, double> EmissionFunction { get; set; }
-
-        private Func<T, List<S>> NearbyStates { get; set; }
+        public IHiddenMarkovModel<S,T> Model { get; set; }
 
         public ViterbiEngine(IHiddenMarkovModel<S, T> model)
         {
-            TransitionFunction = (x, y) => model.GetTransition(x, y);
-            EmissionFunction = x => model.GetEmission(x);
-            NearbyStates = x => model.GetHiddenStateCandidates(x);
             ViterbiState = ViterbiState<S, T>.InitialState();
         }
 
         public bool TryUpdate(T observation)
         {
             //Get "nearby" states
-            List<S> nearbyStates = NearbyStates(observation);
+            List<S> nearbyStates = Model.GetHiddenStateCandidates(observation);
+
+            if(nearbyStates.Count == 0)
+            {
+                return false;
+            }
 
             // Initialize new transition memory
             var transitionMemory = new Dictionary<S, S>();
@@ -41,7 +41,7 @@ namespace HMM
             {
                 foreach (var state in nearbyStates)
                 {
-                    newProbabilityVector[state] = EmissionFunction(StateObservationPair<S, T>.New(state, observation));
+                    newProbabilityVector[state] = Model.GetEmission(StateObservationPair<S, T>.New(state, observation));
                     transitionMemory[state] = default(S);
                 }
             }
@@ -51,14 +51,14 @@ namespace HMM
                 {
                     var stateObservationPair = StateObservationPair<S, T>.New(state, observation);
                     // Calculate emission probability
-                    double emission = EmissionFunction(stateObservationPair);
+                    double emission = Model.GetEmission(stateObservationPair);
 
                     var prevStateCandidates = new Dictionary<S, double>();
                     //Calculate most likely transition probability 
                     foreach (var prevCandidate in ViterbiState.Probabilities.Keys)
                     {
                         var candidateStateObservationPair = StateObservationPair<S, T>.New(prevCandidate, ViterbiState.PrevObservation);
-                        double transition = TransitionFunction(candidateStateObservationPair, stateObservationPair);
+                        double transition = Model.GetTransition(candidateStateObservationPair, stateObservationPair);
                         prevStateCandidates[prevCandidate] = ViterbiState.Probabilities[prevCandidate] * transition;
                     }
                     var maxCandidate = prevStateCandidates.Aggregate((x, y) => x.Value > y.Value ? x : y);
@@ -69,6 +69,10 @@ namespace HMM
                 }
             }
 
+            if(newProbabilityVector.Sum() < double.Epsilon)
+            {
+                return false;
+            }
 
             //Update state 
             ViterbiState.Probabilities = newProbabilityVector.Normalize();
@@ -81,6 +85,11 @@ namespace HMM
         public List<S> GetMostLikelySequence()
         {
             return ViterbiState.GetMostLikelySequence();
+        }
+
+        public void Reset()
+        {
+            ViterbiState = ViterbiState<S, T>.InitialState();
         }
     }
 }
