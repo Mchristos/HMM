@@ -41,6 +41,24 @@ namespace HMM
                 return new List<S>();
             }
         }
+        /// <summary>
+        /// Gets the viterbi sequence ending in the given state.
+        /// </summary>
+        /// <param name="lastState"></param>
+        /// <returns> Sequence of states ending in the given state. </returns>
+        public List<S> GetSequence(S lastState)
+        {
+            if (Probabilities != null && Probabilities.Count > 0)
+            {
+                // trace back sequence
+                List<S> result = TransitionMemory.TraceBackSequence(lastState);
+                return result;
+            }
+            else
+            {
+                return new List<S>();
+            }
+        }
 
     }
 }

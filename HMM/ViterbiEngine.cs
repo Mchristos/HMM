@@ -88,6 +88,11 @@ namespace HMM
             return ViterbiState.GetMostLikelySequence();
         }
 
+        public S GetMostLikelyState()
+        {
+            return ViterbiState.Probabilities.GetMostProbableItem();
+        }
+
         public void Reset()
         {
             ViterbiState = ViterbiState<S, T>.InitialState();

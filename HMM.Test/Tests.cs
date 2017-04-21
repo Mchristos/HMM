@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HMM.Functions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,6 +47,46 @@ namespace HMM.Test
             var result = engine.GetMostLikelySequence();
 
             Assert.Equal(expectedResult, result);
+        }
+
+
+        [Fact]
+        public void TraceBackSequence_Expected()
+        {
+            var input = new List<Dictionary<int, int>>();
+            input.Add(
+                new Dictionary<int, int>()
+                {
+                    [1] = 1,
+                    [2] = 2,
+                    [3] = 3
+                });
+
+            int seedValue = 1;
+            var actualResult = input.TraceBackSequence(seedValue);
+            // expect traced back sequnce to be one longer than the input 'memory' list 
+            Assert.Equal(input.Count + 1, actualResult.Count);
+
+            var expectedResult = new List<int>() { 1, 1 };
+
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void TraceBackSequence_Exception()
+        {
+            var input = new List<Dictionary<int, int>>();
+            input.Add(
+                new Dictionary<int, int>()
+                {
+                    [1] = 1,
+                    [2] = 2,
+                    [3] = 3
+                });
+
+            // seed value to start tracing back sequence not valid
+            int seedValue = 99;
+            Assert.Throws<ArgumentException>(() => input.TraceBackSequence(seedValue));
         }
     }
 }

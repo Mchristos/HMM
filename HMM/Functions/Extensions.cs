@@ -30,29 +30,5 @@ namespace HMM.Functions
             }
             return Enumerable.Reverse(backwardsResult).ToList();
         }
-
-        /// <summary>
-        /// Eradicates duplicated neighboring values
-        /// e.g. [0,1,2,2,2,3] --> [0,1,2,3]
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public static List<T> RemoveDuplicateNeighbors<T>(this List<T> input) where T : IEquatable<T>
-        {
-            if (input.Count < 2) return input;
-            T currentValue = input.First();
-            var result = new List<T>() { currentValue };
-            for (int i = 1; i < input.Count; i++)
-            {
-                var value = input[i];
-                if (!value.Equals(currentValue))
-                {
-                    result.Add(value);
-                    currentValue = value;
-                }
-            }
-            return result;
-        }
     }
 }
