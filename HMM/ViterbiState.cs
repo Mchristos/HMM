@@ -10,12 +10,19 @@ namespace HMM
     /// <typeparam name="S"></typeparam>
     public class ViterbiState<S, T>
     {
-        public T PrevObservation { get; set; }
         public ProbabilityVector<S> Probabilities { get; set; }
+        public T PrevObservation { get; set; }
         public List<Dictionary<S,S>> TransitionMemory { get; set; }
 
         public ViterbiState()
         {
+        }
+
+        public ViterbiState(ProbabilityVector<S> probabilities, T prevObservation, List<Dictionary<S, S>> transitionMemory)
+        {
+            Probabilities = probabilities;
+            PrevObservation = prevObservation;
+            TransitionMemory = transitionMemory;
         }
 
         public static ViterbiState<S, T> InitialState()
@@ -25,6 +32,7 @@ namespace HMM
             result.TransitionMemory = new List<Dictionary<S, S>>();
             return result;
         }
+
 
         public List<S> GetMostLikelySequence()
         {

@@ -14,16 +14,40 @@ namespace HMM
     /// <typeparam name="T"> Observation type </typeparam>
     public class ViterbiEngine<S, T>
     {
-        public ViterbiState<S, T> ViterbiState { get; set; }
+        private int _stateHistoryDepth = 5;
 
+        /// <summary>
+        /// Records the latest viterbi states (from the last x updates, where x = _stateHistoryDepth) 
+        /// </summary>
+        public List<ViterbiState<S, T>> LatestViterbiStates { get; set; }
+
+        /// <summary>
+        /// The state of the Viterbi Engine (not to be confused with the states of type S)  
+        /// </summary>
+        public ViterbiState<S, T> ViterbiState
+        {
+            get
+            {
+                return LatestViterbiStates.Last();
+            }
+        }
+
+        /// <summary>
+        /// The hidden markov model used to calculate emissions and transitions. 
+        /// </summary>
         public IHiddenMarkovModel<S,T> Model { get; set; }
 
         public ViterbiEngine(IHiddenMarkovModel<S, T> model)
         {
-            ViterbiState = ViterbiState<S, T>.InitialState();
+            LatestViterbiStates = new List<ViterbiState<S, T>>() { ViterbiState<S, T>.InitialState() };
             Model = model;
         }
 
+        /// <summary>
+        /// Updates the state of the Viterbi engine given an observation. 
+        /// </summary>
+        /// <param name="observation"></param>
+        /// <returns></returns>
         public bool TryUpdate(T observation)
         {
             //Get "nearby" states
@@ -35,7 +59,7 @@ namespace HMM
             }
 
             // Initialize new transition memory
-            var transitionMemory = new Dictionary<S, S>();
+            var transitions = new Dictionary<S, S>();
             // Initialize new probability vector
             var newProbabilityVector = new ProbabilityVector<S>();
             if (ViterbiState.PrevObservation == null)
@@ -43,7 +67,7 @@ namespace HMM
                 foreach (var state in nearbyStates)
                 {
                     newProbabilityVector[state] = Model.GetEmissionProbability(StateObservationPair<S, T>.New(state, observation));
-                    transitionMemory[state] = default(S);
+                    transitions[state] = default(S);
                 }
             }
             else
@@ -66,7 +90,7 @@ namespace HMM
 
                     // Update probability and transition memory
                     newProbabilityVector[state] = maxCandidate.Value * emission;
-                    transitionMemory[state] = maxCandidate.Key;
+                    transitions[state] = maxCandidate.Key;
                 }
             }
 
@@ -76,26 +100,46 @@ namespace HMM
             }
 
             //Update state 
-            ViterbiState.Probabilities = newProbabilityVector.Normalize();
-            ViterbiState.PrevObservation = observation;
-            ViterbiState.TransitionMemory.Add(transitionMemory);
-
+            UpdateViterbiState(newProbabilityVector.Normalize(), observation, transitions);
             return true;
         }
 
+        /// <summary>
+        /// Gets the most likely sequence of states given the current state of the engine. 
+        /// </summary>
+        /// <returns></returns>
         public List<S> GetMostLikelySequence()
         {
             return ViterbiState.GetMostLikelySequence();
         }
 
+        /// <summary>
+        /// Gets the most likely state (technically, the last state of the most likely sequence) given the current state of the engine. 
+        /// </summary>
+        /// <returns></returns>
         public S GetMostLikelyState()
         {
             return ViterbiState.Probabilities.GetMostProbableItem();
         }
 
+        /// <summary>
+        /// Resets the state of the engine. 
+        /// </summary>
         public void Reset()
         {
-            ViterbiState = ViterbiState<S, T>.InitialState();
+            LatestViterbiStates = new List<ViterbiState<S, T>>() { ViterbiState<S, T>.InitialState() };
+        }
+
+        private void UpdateViterbiState(ProbabilityVector<S> probabilities, T prevObservation, Dictionary<S, S> transitions)
+        {
+            var newTransitionMemory = ViterbiState.TransitionMemory.ToList();
+            newTransitionMemory.Add(transitions);
+            var newViterbiState = new ViterbiState<S, T>(probabilities, prevObservation, newTransitionMemory);
+            LatestViterbiStates.Add(newViterbiState);
+            if (LatestViterbiStates.Count > _stateHistoryDepth)
+            {
+                LatestViterbiStates = LatestViterbiStates.Skip(1).ToList();
+            }
         }
     }
 }
